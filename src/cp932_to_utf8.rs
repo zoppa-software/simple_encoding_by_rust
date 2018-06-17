@@ -1171,6 +1171,7 @@ fn mapping_utf8(ch: u32) -> Option<u32> {
     None
 }
 
+/// 文字列値（utf16）を配列に保持
 fn add_utf8_byte(ans: &mut Vec<u8>, v: u32) {
     if v < 0x80 {
         ans.push(v as u8);
@@ -1207,19 +1208,24 @@ fn add_utf8_byte(ans: &mut Vec<u8>, v: u32) {
     }
 }
 
+/// 文字列変換（CP932 -> UTF8）
 pub fn convert(source: &Vec<u8>) -> Result<String, String> {
     let ptr = source.as_ptr();
     let mut ans: Vec<u8> = Vec::new();
 
+    // 文字列変換
+    //
+    // 1. 0x80未満は 1文字を保持
+    // 2. 2byte値を UTF8へ変換
     let mut i: isize = 0;
     unsafe {
         while i < source.len() as isize {
             let c = *ptr.offset(i);
-            if (c & 0x80) == 0 {
+            if (c & 0x80) == 0 {        // 1
                 ans.push(c);
                 i += 1;
             }
-            else {
+            else {                      // 2
                 let v = c as u32 * 256 + *ptr.offset(i + 1) as u32;
                 match mapping_utf8(v) {
                     Some(v) => {
@@ -1234,6 +1240,7 @@ pub fn convert(source: &Vec<u8>) -> Result<String, String> {
         }
     }
 
+    // 戻り値を返す
     if let Ok(s) = String::from_utf8(ans) {
         Ok(s)
     }
