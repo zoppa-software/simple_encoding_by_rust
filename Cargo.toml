@@ -1,0 +1,6 @@
+[package]
+name = "encoding"
+version = "0.1.0"
+authors = ["zoppa-software <zoppa@ab.auone-net.jp>"]
+
+[dependencies]
