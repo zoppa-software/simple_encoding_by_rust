@@ -1,5 +1,6 @@
 extern crate encoding;
 use encoding::utf8_to_cp932;
+use encoding::cp932_to_utf8;
 
 static TO_SJIS_TABLE: [(&str, u16); 7312] = [
     ("　",0x8140),
@@ -7347,8 +7348,16 @@ static TO_SJIS_TABLE: [(&str, u16); 7312] = [
 #[test]
 fn cp932_test() {
     for (c, code) in TO_SJIS_TABLE.iter() {
-        println!("-{:?}-", c);
         let vs = utf8_to_cp932::convert(c).unwrap();
         assert_eq!(*code, (vs[0] as u16) * 256 + (vs[1] as u16));
+    }
+}
+
+#[test]
+fn utf8_test() {
+    for (c, code) in TO_SJIS_TABLE.iter() {
+        let vc: Vec<u8> = vec![(*code >> 8) as u8, (*code & 0xff) as u8];
+        let vs = cp932_to_utf8::convert(&vc).unwrap();
+        assert_eq!(c.to_string(), vs);
     }
 }
